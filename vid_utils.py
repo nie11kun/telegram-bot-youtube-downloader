@@ -30,7 +30,7 @@ class Video:
     def get_formats(self):
         formats = []
 
-        cmd = "youtube-dl -F {}".format(self.link)# this command return the video info to string
+        cmd = "youtube-dl --no-check-certificate -F {}".format(self.link)# this command return the video info to string
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
         # creat subprocess,args is a string, the string is interpreted as the name or path of the program to execute
         #If shell is True, it is recommended to pass args as a string rather than as a sequence.
@@ -94,7 +94,7 @@ class Video:
             self.link = 'https://twitter.com/BleacherReport/status/' + self.link.split(':')[1]
             self.outputFileName = '%(id)s.%(ext)s'
             
-        cmd = 'youtube-dl -f {0} {1} -o "{2}"'.format(resolution_code, self.link, self.downloadPath + self.outputFileName)# download video command
+        cmd = 'youtube-dl --no-check-certificate -f {0} {1} -o "{2}"'.format(resolution_code, self.link, self.downloadPath + self.outputFileName)# download video command
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
@@ -110,10 +110,19 @@ class Video:
         os.system('mv "{0}" "{1}"'.format(self.file_path, new_fp))
         self.file_name = new_fn
         self.file_path = new_fp
-
-    def check_dimension(self):
         self.real_file_name = self.file_name.split('.')[0]
         self.extension = '.' + self.file_name.split('.')[-1]# last matched
+
+        if self.extension == 'flv':
+            os.system('ffmpeg -i {} -vcodec libx264 -crf 19 {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg.mp4'))
+            os.remove(self.file_path)
+            self.file_name = self.real_file_name + '_ffmpeg.mp4'
+            self.file_path = self.downloadPath + self.file_name
+            self.real_file_name = self.file_name.split('.')[0]
+            self.extension = '.' + self.file_name.split('.')[-1]# last matched
+
+    def check_dimension(self):
+
         '''
         if self.extension == '.m4a':
             os.system('ffmpeg -i "{0}" -acodec libmp3lame -aq 6 "{1}"'.format(self.file_name, self.real_file_name + '.mp3'))
