@@ -3,7 +3,7 @@ import os
 import glob
 import math
 import shlex
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, check_output
 from time import strftime, strptime, sleep
 from contextlib import contextmanager
 
@@ -34,7 +34,7 @@ class Video:
 
         # this command return the video info to string
         cmd = "youtube-dl --no-check-certificate -F {}".format(self.link)
-        
+
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
         # creat subprocess,args is a string, the string is interpreted as the name or path of the program to execute
         # If shell is True, it is recommended to pass args as a string rather than as a sequence.
@@ -145,7 +145,8 @@ class Video:
         if os.path.getsize(self.file_path) > 50 * 1024 * 1023:  # big than 50mb
             #os.system('ffmpeg -i {} -fs 49M -c copy {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg' + self.extension))
             
-            split_length = 49 * 8192 * 1024 / self.get_video_bitrate(self.file_path)
+            video_bitrate = self.get_video_bitrate(self.file_path)
+            split_length = 49 * 8192 * 1024 / video_bitrate
             split_length = int(split_length)
             self.split_by_seconds(filename=self.file_path, split_length=split_length)
             os.remove(self.file_path)#remove orignal file
@@ -167,7 +168,7 @@ class Video:
 
     def get_video_length(filename):
 
-        output = subprocess.check_output(("ffprobe", "-v", "error", "-show_entries",
+        output = check_output(("ffprobe", "-v", "error", "-show_entries",
                                         "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
         video_length = int(float(output))
         print("Video length in seconds: "+str(video_length))
@@ -176,7 +177,7 @@ class Video:
 
     def get_video_bitrate(filename):
 
-        output = subprocess.check_output(("ffprobe", "-v", "error", "-show_entries",
+        output = check_output(("ffprobe", "-v", "error", "-show_entries",
                                         "format=bit_rate", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
         video_bitrate = int(float(output))
         print("Video length in seconds: "+str(video_bitrate))
