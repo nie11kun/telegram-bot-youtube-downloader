@@ -1,6 +1,8 @@
 import re
 import os
 import glob
+import math
+import shlex
 from subprocess import Popen, PIPE
 from time import strftime, strptime, sleep
 from contextlib import contextmanager
@@ -30,15 +32,18 @@ class Video:
     def get_formats(self):
         formats = []
 
-        cmd = "youtube-dl --no-check-certificate -F {}".format(self.link)# this command return the video info to string
+        # this command return the video info to string
+        cmd = "youtube-dl --no-check-certificate -F {}".format(self.link)
+        
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
         # creat subprocess,args is a string, the string is interpreted as the name or path of the program to execute
-        #If shell is True, it is recommended to pass args as a string rather than as a sequence.
-        #communicate() returns a tuple (stdoutdata, stderrdata).
-        #communicate() Interact with process: Send data to stdin. Read data from stdout and stderr, until end-of-file is reached. Wait for process to terminate.
+        # If shell is True, it is recommended to pass args as a string rather than as a sequence.
+        # communicate() returns a tuple (stdoutdata, stderrdata).
+        # communicate() Interact with process: Send data to stdin. Read data from stdout and stderr, until end-of-file is reached. Wait for process to terminate.
 
-        it = iter(p[0].decode("utf-8", 'ignore').split('\n')) # stdoutdata split with /n in a array to a iterate
-        #iter([a,b,c])
+        # stdoutdata split with /n in a array to a iterate
+        it = iter(p[0].decode("utf-8", 'ignore').split('\n'))
+        # iter([a,b,c])
 
         try:
             for line in it:
@@ -53,22 +58,23 @@ class Video:
                         break
                     break
 
-            while "format code  extension" not in next(it): pass #if has not this string then goto next line
+            while "format code  extension" not in next(it):
+                pass  # if has not this string then goto next line
         except StopIteration:
-            raise BadLink # Isn't a valid link
+            raise BadLink  # Isn't a valid link
 
         while True:
             try:
                 line = next(it)
                 if not line:
-                    raise StopIteration # Usually the last line is empty
+                    raise StopIteration  # Usually the last line is empty
                 if "video only" in line:
-                    continue # I don't need video without audio
+                    continue  # I don't need video without audio
             except StopIteration:
                 break
             else:
                 format_code, extension, resolution, *_ = line.strip().split()
-                #strip() Remove spaces at the beginning and at the end of the string
+                # strip() Remove spaces at the beginning and at the end of the string
                 if extension != 'webm':
                     if extension == 'm4a':
                         extension = 'm4a'
@@ -82,47 +88,53 @@ class Video:
 
         for code, extension, resolution in self.formats:
             kb.append([InlineKeyboardButton("{0}, {1}, file".format(extension, resolution),
-                                     callback_data="{0} {1} file".format(code, self.link))]) #Data to be sent in a callback query to the bot, will trige CallbackQueryHandler in main.py
+                                            callback_data="{0} {1} file".format(code, self.link))])  # Data to be sent in a callback query to the bot, will trige CallbackQueryHandler in main.py
             kb.append([InlineKeyboardButton("{0}, {1}, link".format(extension, resolution),
-                                     callback_data="{0} {1} link".format(code, self.link))]) #Data to be sent in a callback query to the bot, will trige CallbackQueryHandler in main.py
+                                            callback_data="{0} {1} link".format(code, self.link))])  # Data to be sent in a callback query to the bot, will trige CallbackQueryHandler in main.py
         return kb
 
     def download(self, resolution_code):
         if 'pornhub:' in self.link:
-            self.link = 'https://www.pornhub.com/view_video.php?viewkey=' + self.link.split(':')[1]
+            self.link = 'https://www.pornhub.com/view_video.php?viewkey=' + \
+                self.link.split(':')[1]
         if 'twitter:' in self.link:
-            self.link = 'https://twitter.com/BleacherReport/status/' + self.link.split(':')[1]
+            self.link = 'https://twitter.com/BleacherReport/status/' + \
+                self.link.split(':')[1]
             self.outputFileName = '%(id)s.%(ext)s'
-            
-        cmd = 'youtube-dl --no-check-certificate -f {0} {1} -o "{2}"'.format(resolution_code, self.link, self.downloadPath + self.outputFileName)# download video command
+
+        cmd = 'youtube-dl --no-check-certificate -f {0} {1} -o "{2}"'.format(
+            resolution_code, self.link, self.downloadPath + self.outputFileName)  # download video command
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
             if "[download] Destination:" in line:
                 self.file_path = line[24:]
-                self.file_name = self.file_path.split('/')[-1] # name of the file
+                self.file_name = self.file_path.split(
+                    '/')[-1]  # name of the file
             elif "has already been downloaded" in line:
                 self.file_path = line[11:-28]
                 self.file_name = self.file_path.split('/')[-1]
 
-        new_fn = self.file_name.replace(' ', '_').replace('[', '_').replace(']', '_')
+        new_fn = self.file_name.replace(
+            ' ', '_').replace('[', '_').replace(']', '_')
         new_fp = self.downloadPath + new_fn
         os.system('mv "{0}" "{1}"'.format(self.file_path, new_fp))
         self.file_name = new_fn
         self.file_path = new_fp
         self.real_file_name = self.file_name.split('.')[0]
-        self.extension = '.' + self.file_name.split('.')[-1]# last matched
+        self.extension = '.' + self.file_name.split('.')[-1]  # last matched
 
         if self.extension == 'flv':
-            os.system('ffmpeg -i {} -vcodec libx264 -crf 19 {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg.mp4'))
+            os.system('ffmpeg -i {} -vcodec libx264 -crf 19 {}'.format(self.file_path,
+                                                                       self.downloadPath + self.real_file_name + '_ffmpeg.mp4'))
             os.remove(self.file_path)
             self.file_name = self.real_file_name + '_ffmpeg.mp4'
             self.file_path = self.downloadPath + self.file_name
             self.real_file_name = self.file_name.split('.')[0]
-            self.extension = '.' + self.file_name.split('.')[-1]# last matched
+            self.extension = '.' + \
+                self.file_name.split('.')[-1]  # last matched
 
     def check_dimension(self):
-
         '''
         if self.extension == '.m4a':
             os.system('ffmpeg -i "{0}" -acodec libmp3lame -aq 6 "{1}"'.format(self.file_name, self.real_file_name + '.mp3'))
@@ -130,27 +142,86 @@ class Video:
             self.file_name = self.real_file_name + '.mp3'
             self.extension = '.mp3'
         '''
-        if os.path.getsize(self.file_path) > 50 * 1024 * 1023:# big than 50mb
-            os.system('ffmpeg -i {} -fs 49M -c copy {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg' + self.extension))
-            os.remove(self.file_path)#remove orignal file
+        if os.path.getsize(self.file_path) > 50 * 1024 * 1023:  # big than 50mb
+            #os.system('ffmpeg -i {} -fs 49M -c copy {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg' + self.extension))
             
-            #os.system('split -b 49M "{0}" "{1}"'.format(self.file_name, self.real_file_name + '_'))
-            #os.system() run real command in your machine
+            split_length = 49 * 8192 * 1024 / self.get_video_bitrate(self.file_path)
+            split_length = int(split_length)
+            self.split_by_seconds(filename=self.file_path, split_length=split_length)
+            os.remove(self.file_path)#remove orignal file
 
-            #os.remove(self.file_name)#remove orignal file
+            #os.system('split -b 49M "{0}" "{1}"'.format(self.file_name, self.real_file_name + '_'))
+            # os.system() run real command in your machine
+
+            # os.remove(self.file_name)#remove orignal file
 
             #files = glob.glob(self.real_file_name + '*')
-            #for file in files:
+            # for file in files:
             #    nfile = "'" + file + "'"
             #    nfile_ext = "'" + file + self.extension + "'"
             #    cmd = 'mv ' + nfile + ' ' + nfile_ext
             #    os.system(cmd)
 
-        return glob.glob(self.downloadPath + self.real_file_name + '*')# return files match in glob.glob('')
+            # return files match in glob.glob('')
+        return glob.glob(self.downloadPath + self.real_file_name + '*')
 
-    @contextmanager #run this function with new defined send function
+    def get_video_length(filename):
+
+        output = subprocess.check_output(("ffprobe", "-v", "error", "-show_entries",
+                                        "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
+        video_length = int(float(output))
+        print("Video length in seconds: "+str(video_length))
+
+        return video_length
+
+    def get_video_bitrate(filename):
+
+        output = subprocess.check_output(("ffprobe", "-v", "error", "-show_entries",
+                                        "format=bit_rate", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
+        video_bitrate = int(float(output))
+        print("Video length in seconds: "+str(video_bitrate))
+
+        return video_bitrate
+
+    def ceildiv(a, b):
+        return int(math.ceil(a / float(b)))
+
+    def split_by_seconds(filename, split_length, vcodec="copy", acodec="copy",
+                        extra="", video_length=None):
+        if split_length and split_length <= 0:
+            print("Split length can't be 0")
+            raise SystemExit
+
+        if not video_length:
+            video_length = get_video_length(filename)
+        split_count = ceildiv(video_length, split_length)
+        if(split_count == 1):
+            print("Video length is less then the target split length.")
+            raise SystemExit
+
+        split_cmd = ["ffmpeg", "-i", filename, "-vcodec",
+                    vcodec, "-acodec", acodec] + shlex.split(extra)
+        try:
+            filebase = ".".join(filename.split(".")[:-1])
+            fileext = filename.split(".")[-1]
+        except IndexError as e:
+            raise IndexError("No . in filename. Error: " + str(e))
+        for n in range(0, split_count):
+            split_args = []
+            if n == 0:
+                split_start = 0
+            else:
+                split_start = split_length * n
+
+            split_args += ["-ss", str(split_start), "-t", str(split_length),
+                        filebase + "-" + str(n+1) + "-of-" +
+                        str(split_count) + "." + fileext]
+            cmd = '{} {}'.format(split_cmd, split_args)
+            p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+
+    @contextmanager  # run this function with new defined send function
     def send_file(self):
-        files = self.check_dimension() # split if size >= 50MB
+        files = self.check_dimension()  # split if size >= 50MB
         yield files
 
     def send_link(self):
@@ -160,5 +231,5 @@ class Video:
 
     def remove(self):
         files = glob.glob(self.downloadPath + self.real_file_name + '*')
-        for f in files: #removing old files
+        for f in files:  # removing old files
             os.remove(f)
