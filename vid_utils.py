@@ -204,13 +204,12 @@ class Video:
         split_cmd = "ffmpeg -i " + filename + " -c:v " + vcodec + " -c:a " + acodec
 
         for n in range(0, split_count):
-            split_args = []
             if n == 0:
                 split_start = 0
             else:
                 split_start = split_length * n
 
-            split_args += "-ss " + str(split_start) + " -t " + str(split_length) + " " +
+            split_args = "-ss " + str(split_start) + " -t " + str(split_length) + " " +
                         self.real_file_name + "-" + str(n+1) + "-of-" +
                         str(split_count) + "." + self.extension
             cmd = '{} {}'.format(split_cmd, split_args)
