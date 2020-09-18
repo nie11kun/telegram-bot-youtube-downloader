@@ -166,7 +166,7 @@ class Video:
             # return files match in glob.glob('')
         return glob.glob(self.downloadPath + self.real_file_name + '*')
 
-    def get_video_length(filename):
+    def get_video_length(self, filename):
 
         output = check_output(("ffprobe", "-v", "error", "-show_entries",
                                         "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
@@ -175,7 +175,7 @@ class Video:
 
         return video_length
 
-    def get_video_bitrate(filename):
+    def get_video_bitrate(self, filename):
 
         output = check_output(("ffprobe", "-v", "error", "-show_entries",
                                         "format=bit_rate", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
@@ -187,7 +187,7 @@ class Video:
     def ceildiv(a, b):
         return int(math.ceil(a / float(b)))
 
-    def split_by_seconds(filename, split_length, vcodec="copy", acodec="copy",
+    def split_by_seconds(self, filename, split_length, vcodec="copy", acodec="copy",
                         extra="", video_length=None):
         if split_length and split_length <= 0:
             print("Split length can't be 0")
