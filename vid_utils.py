@@ -184,7 +184,7 @@ class Video:
 
         return video_bitrate
 
-    def ceildiv(a, b):
+    def ceildiv(self, a, b):
         return int(math.ceil(a / float(b)))
 
     def split_by_seconds(self, filename, split_length, vcodec="copy", acodec="copy",
@@ -194,8 +194,8 @@ class Video:
             raise SystemExit
 
         if not video_length:
-            video_length = get_video_length(filename)
-        split_count = ceildiv(video_length, split_length)
+            video_length = self.get_video_length(filename)
+        split_count = self.ceildiv(video_length, split_length)
         if(split_count == 1):
             print("Video length is less then the target split length.")
             raise SystemExit
