@@ -210,7 +210,7 @@ class Video:
             else:
                 split_start = split_length * n
 
-            split_args += "-ss " + str(split_start) + " -t " + str(split_length) + " "
+            split_args += "-ss " + str(split_start) + " -t " + str(split_length) + " " +
                         self.real_file_name + "-" + str(n+1) + "-of-" +
                         str(split_count) + "." + self.extension
             cmd = '{} {}'.format(split_cmd, split_args)
