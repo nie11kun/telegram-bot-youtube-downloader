@@ -146,8 +146,10 @@ class Video:
             #os.system('ffmpeg -i {} -fs 49M -c copy {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg' + self.extension))
             
             video_bitrate = self.get_video_bitrate(self.file_path)
-            split_length = 49 * 8192 * 1024 / video_bitrate
+            split_length = 49 * 8192 / ( video_bitrate / 1024 )
             split_length = int(split_length)
+            print('split_length is: {}'.format(split_length))
+
             self.split_by_seconds(filename=self.file_path, split_length=split_length)
             os.remove(self.file_path)#remove orignal file
 
@@ -180,15 +182,14 @@ class Video:
         output = check_output(("ffprobe", "-v", "error", "-show_entries",
                                         "format=bit_rate", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
         video_bitrate = int(float(output))
-        print("Video length in seconds: "+str(video_bitrate))
+        print("Video bitrate: "+str(video_bitrate))
 
         return video_bitrate
 
     def ceildiv(self, a, b):
         return int(math.ceil(a / float(b)))
 
-    def split_by_seconds(self, filename, split_length, vcodec="copy", acodec="copy",
-                        extra="", video_length=None):
+    def split_by_seconds(self, filename, split_length, vcodec="copy", acodec="copy", video_length=None):
         if split_length and split_length <= 0:
             print("Split length can't be 0")
             raise SystemExit
@@ -200,13 +201,8 @@ class Video:
             print("Video length is less then the target split length.")
             raise SystemExit
 
-        split_cmd = ["ffmpeg", "-i", filename, "-vcodec",
-                    vcodec, "-acodec", acodec] + shlex.split(extra)
-        try:
-            filebase = ".".join(filename.split(".")[:-1])
-            fileext = filename.split(".")[-1]
-        except IndexError as e:
-            raise IndexError("No . in filename. Error: " + str(e))
+        split_cmd = ["ffmpeg", "-i", filename, "-c:v", vcodec, "-c:a", acodec]
+
         for n in range(0, split_count):
             split_args = []
             if n == 0:
@@ -215,8 +211,8 @@ class Video:
                 split_start = split_length * n
 
             split_args += ["-ss", str(split_start), "-t", str(split_length),
-                        filebase + "-" + str(n+1) + "-of-" +
-                        str(split_count) + "." + fileext]
+                        self.real_file_name + "-" + str(n+1) + "-of-" +
+                        str(split_count) + "." + self.extension]
             cmd = '{} {}'.format(split_cmd, split_args)
             p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
