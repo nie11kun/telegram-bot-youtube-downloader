@@ -9,6 +9,7 @@ from contextlib import contextmanager
 
 from telegram import InlineKeyboardButton
 
+
 class BadLink(Exception):
     pass
 
@@ -144,14 +145,15 @@ class Video:
         '''
         if os.path.getsize(self.file_path) > 50 * 1024 * 1023:  # big than 50mb
             #os.system('ffmpeg -i {} -fs 49M -c copy {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg' + self.extension))
-            
+
             video_bitrate = self.get_video_bitrate(self.file_path)
-            split_length = 49 * 8192 / ( video_bitrate / 1024 )
+            split_length = 49 * 8192 / (video_bitrate / 1024)
             split_length = int(split_length)
             print('split_length is: {}'.format(split_length))
 
-            self.split_by_seconds(filename=self.file_path, split_length=split_length)
-            os.remove(self.file_path)#remove orignal file
+            self.split_by_seconds(filename=self.file_path,
+                                  split_length=split_length)
+            os.remove(self.file_path)  # remove orignal file
 
             #os.system('split -b 49M "{0}" "{1}"'.format(self.file_name, self.real_file_name + '_'))
             # os.system() run real command in your machine
@@ -171,7 +173,7 @@ class Video:
     def get_video_length(self, filename):
 
         output = check_output(("ffprobe", "-v", "error", "-show_entries",
-                                        "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
+                               "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
         video_length = int(float(output))
         print("Video length in seconds: "+str(video_length))
 
@@ -180,7 +182,7 @@ class Video:
     def get_video_bitrate(self, filename):
 
         output = check_output(("ffprobe", "-v", "error", "-show_entries",
-                                        "format=bit_rate", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
+                               "format=bit_rate", "-of", "default=noprint_wrappers=1:nokey=1", filename)).strip()
         video_bitrate = int(float(output))
         print("Video bitrate: "+str(video_bitrate))
 
@@ -197,6 +199,8 @@ class Video:
         if not video_length:
             video_length = self.get_video_length(filename)
         split_count = self.ceildiv(video_length, split_length)
+        print('count is {}'.format(split_count))
+
         if(split_count == 1):
             print("Video length is less then the target split length.")
             raise SystemExit
@@ -209,7 +213,9 @@ class Video:
             else:
                 split_start = split_length * n
 
-            split_args = "-ss " + str(split_start) + " -t " + str(split_length) + " " + self.real_file_name + "-" + str(n+1) + "-of-" + str(split_count) + "." + self.extension
+            split_args = "-ss " + str(split_start) + " -t " + str(split_length) + " " + \
+                self.downloadPath + self.real_file_name + "-" + \
+                str(n+1) + "-of-" + str(split_count) + "." + self.extension
             cmd = '{} {}'.format(split_cmd, split_args)
             p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
