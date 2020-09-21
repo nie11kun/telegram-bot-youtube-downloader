@@ -225,7 +225,10 @@ class Video:
         yield files
 
     def send_link(self):
-        os.system('mv "{0}" /home/www/cloud/temp/'.format(self.file_path))
+        cmd = 'mv "{0}" /home/www/cloud/temp/'.format(self.file_path)
+        Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+
+        # os.system('mv "{0}" /home/www/cloud/temp/'.format(self.file_path))
         file_link = 'https://niekun.net/cloud/temp/{}'.format(self.file_name)
         return file_link
 
