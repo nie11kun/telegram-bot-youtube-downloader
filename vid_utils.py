@@ -3,6 +3,7 @@ import os
 import glob
 import math
 import shlex
+import shutil
 from subprocess import Popen, PIPE, check_output
 from time import strftime, strptime, sleep
 from contextlib import contextmanager
@@ -225,10 +226,11 @@ class Video:
         yield files
 
     def send_link(self):
-        cmd = 'mv "{0}" /home/www/cloud/temp/'.format(self.file_path)
-        Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+        #shutil.move(self.file_path, '/home/www/cloud/temp/')
+        # cmd = 'mv "{0}" /home/www/cloud/temp/'.format(self.file_path)
+        #Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
-        # os.system('mv "{0}" /home/www/cloud/temp/'.format(self.file_path))
+        os.system('mv "{0}" /home/www/cloud/temp/'.format(self.file_path))
         file_link = 'https://niekun.net/cloud/temp/{}'.format(self.file_name)
         return file_link
 
