@@ -117,7 +117,7 @@ class Video:
                 self.file_name = self.file_path.split('/')[-1]
 
         new_fn = self.file_name.replace(
-            ' ', '_').replace('[', '_').replace(']', '_')
+            ' ', '_').replace('[', '_').replace(']', '_').replace('，', '_').replace(',', '_').replace('：', '_').replace(':', '_')
         new_fp = self.downloadPath + new_fn
         os.system('mv "{0}" "{1}"'.format(self.file_path, new_fp))
         self.file_name = new_fn
