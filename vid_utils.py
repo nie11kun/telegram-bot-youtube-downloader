@@ -4,6 +4,7 @@ import glob
 import math
 import shlex
 import shutil
+import sitealias
 from subprocess import Popen, PIPE, check_output
 from time import strftime, strptime, sleep
 from contextlib import contextmanager
@@ -25,7 +26,7 @@ class Video:
         self.serialNumber = None
         self.videoSite = None
         self.downloadPath = '/tmp/'
-        self.outputFileName = '%(title)s.%(ext)s'
+        self.outputFileName = '%(title)s.%(ext)s' # use youtube-dl build-in parameters
 
         if init_keyboard:
             self.formats = self.get_formats()
@@ -52,8 +53,11 @@ class Video:
                 if "Available formats for" in line:
                     self.serialNumber = line[29:-1]
 
+                    if 'youtube.com' in self.link:
+                        self.link = 'youtube:' + self.serialNumber
+                        break
                     if 'pornhub.com' in self.link:
-                        self.link = 'pornhub:' + self.serialNumber
+                        self.link = 'pornhub:' + self.serialNumber # prevent link too long to issue keyboard call back error
                         break
                     if 'twitter.com' in self.link:
                         self.link = 'twitter:' + self.serialNumber
@@ -96,13 +100,13 @@ class Video:
         return kb
 
     def download(self, resolution_code):
+        if 'youtube:' in self.link:
+            self.link = sitealias.site['youtube'] + self.link.split(':')[1] # regenerate link
         if 'pornhub:' in self.link:
-            self.link = 'https://www.pornhub.com/view_video.php?viewkey=' + \
-                self.link.split(':')[1]
+            self.link = sitealias.site['pornhub'] + self.link.split(':')[1]
         if 'twitter:' in self.link:
-            self.link = 'https://twitter.com/BleacherReport/status/' + \
-                self.link.split(':')[1]
-            self.outputFileName = '%(id)s.%(ext)s'
+            self.link = sitealias.site['twitter'] + self.link.split(':')[1]
+            self.outputFileName = '%(id)s.%(ext)s' # use youtube-dl build-in parameters
 
         cmd = 'youtube-dl --no-check-certificate -f {0} {1} -o "{2}"'.format(
             resolution_code, self.link, self.downloadPath + self.outputFileName)  # download video command
@@ -117,8 +121,10 @@ class Video:
                 self.file_path = line[11:-28]
                 self.file_name = self.file_path.split('/')[-1]
 
-        new_fn = self.file_name.replace(
-            ' ', '_').replace('[', '_').replace(']', '_').replace('，', '_').replace(',', '_').replace('：', '_').replace(':', '_')
+        # new_fn = self.file_name.replace(
+        #     ' ', '_').replace('[', '_').replace(']', '_').replace('，', '_').replace(',', '_').replace('：', '_').replace(':', '_')
+        
+        new_fn = re.sub('[\s\，\,\]\[\:\：\【\】\?\？]', '_', self.file_name)
         new_fp = self.downloadPath + new_fn
         os.system('mv "{0}" "{1}"'.format(self.file_path, new_fp))
         self.file_name = new_fn
