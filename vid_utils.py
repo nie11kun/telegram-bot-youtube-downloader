@@ -133,7 +133,7 @@ class Video:
         self.extension = '.' + self.file_name.split('.')[-1]  # last matched
 
         if self.extension == 'flv':
-            os.system('ffmpeg -i {} -vcodec libx264 -crf 19 {}'.format(self.file_path,
+            os.system('ffmpeg -i {} -c copy {}'.format(self.file_path,
                                                                        self.downloadPath + self.real_file_name + '_ffmpeg.mp4'))
             os.remove(self.file_path)
             self.file_name = self.real_file_name + '_ffmpeg.mp4'
