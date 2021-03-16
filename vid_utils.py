@@ -143,7 +143,6 @@ class Video:
             self.extension = '.' + \
                 self.file_name.split('.')[-1]  # last matched
 
-    @contextmanager  # run this function with new defined send function
     def insDownload(self):
         shortcode = re.search('instagram\.com\/p\/(.*)\/\?', self.link).group(1)
         self.shortcode = shortcode
@@ -155,9 +154,10 @@ class Video:
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
             if "404 Not Found" in line:
                 raise BadLink
-    
-        files = glob.glob(self.downloadPath + shortcode + '/*.[jpg|mp4]')
 
+    @contextmanager  # run this function with new defined send function
+    def send_ins(self):
+        files = glob.glob(self.downloadPath + self.shortcode + '/*.[jpg|mp4]')
         yield files
 
     def check_dimension(self):

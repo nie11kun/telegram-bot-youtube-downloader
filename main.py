@@ -20,7 +20,9 @@ def get_format(update, context):
     if 'instagram.com' in update.message.text:
         video = Video(update.message.text)
         try:
-            with video.insDownload() as files:
+            video.insDownload()
+
+            with video.send_ins as files:
                 for f in files:
                     try:
                         context.bot.send_document(chat_id=query.message.chat_id, document=open(f, 'rb'))#open with binary file and send data
