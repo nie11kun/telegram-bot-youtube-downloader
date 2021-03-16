@@ -145,11 +145,13 @@ class Video:
 
     def insDownload(self):
         shortcode = re.search('instagram\.com\/p\/(.*)\/\?', self.link).group(1)
+        # print(shortcode)
         self.shortcode = shortcode
         if shortcode == None:
             raise BadLink
-        cmd = 'instaloader --dirname-pattern={0}{1} -- -{2}'.format(
-            self.downloadPath, shortcode, shortcode)  # download video command
+        cmd = 'instaloader --dirname-pattern="{0}{1}" -- -{2}'.format(
+            self.downloadPath, shortcode, shortcode)
+        # print(cmd)
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
             if "404 Not Found" in line:
@@ -157,7 +159,9 @@ class Video:
 
     @contextmanager  # run this function with new defined send function
     def send_ins(self):
-        files = glob.glob(self.downloadPath + self.shortcode + '/*.[jpg|mp4]')
+        pics = glob.glob(self.downloadPath + self.shortcode + '/*.jpg')
+        videos = glob.glob(self.downloadPath + self.shortcode + '/*.mp4')
+        files = pics + videos
         yield files
 
     def check_dimension(self):
