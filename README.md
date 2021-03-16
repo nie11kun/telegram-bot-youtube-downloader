@@ -9,9 +9,10 @@ Usage:
         which then need to be concatenated (in linux: cat vid.mp4* > vid.mp4)
 
 This script require:
-  - Python3 interpreter
+  - Python3.8
   - Telegram python api https://github.com/python-telegram-bot/python-telegram-bot
   - youtube-dl https://github.com/rg3/youtube-dl/ (installed on the machine)
+  - instaloader https://instaloader.github.io/index.html
 
 Tips:
   - Use PythonAnyWhere for hosting the bot https://www.pythonanywhere.com
