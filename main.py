@@ -20,15 +20,15 @@ def get_format(update, context):
     if 'instagram.com' in update.message.text:
         video = Video(update.message.text)
         try:
-            files = video.insDownload()
-            for f in files:
-                try:
-                    context.bot.send_document(chat_id=query.message.chat_id, document=open(f, 'rb'))#open with binary file and send data
-                except TimeoutError :
-                    context.bot.send_message(chat_id=update.effective_chat.id, text="Tansfer timeout, place try again later")
-                    video.removeIns()
-            context.bot.send_message(chat_id=update.effective_chat.id, text="Finished")
-            video.removeIns()
+            with video.insDownload() as files:
+                for f in files:
+                    try:
+                        context.bot.send_document(chat_id=query.message.chat_id, document=open(f, 'rb'))#open with binary file and send data
+                    except TimeoutError :
+                        context.bot.send_message(chat_id=update.effective_chat.id, text="Tansfer timeout, place try again later")
+                        video.removeIns()
+                context.bot.send_message(chat_id=update.effective_chat.id, text="Finished")
+                video.removeIns()
         except BadLink:
             update.message.reply_text("Bad link")
         return
