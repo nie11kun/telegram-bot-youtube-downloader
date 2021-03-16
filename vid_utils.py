@@ -156,11 +156,9 @@ class Video:
             if "404 Not Found" in line:
                 raise BadLink
     
-        pics = glob.glob(self.downloadPath + shortcode + '/*.jpg')
-        videos = glob.glob(self.downloadPath + shortcode + '/*.mp4')
+        files = glob.glob(self.downloadPath + shortcode + '/*.[jpg|mp4]')
 
-        yield pics
-        yield videos
+        yield files
 
     def check_dimension(self):
         '''
