@@ -14,8 +14,24 @@ logger = logging.getLogger(__name__)
 
 
 def get_format(update, context):
+    query = update.callback_query
     logger.info("from {}: {}".format(update.message.chat_id, update.message.text)) # "history"
 
+    if 'instagram.com' in update.message.text:
+        video = Video(update.message.text)
+        try:
+            files = video.insDownload()
+            for f in files:
+                try:
+                    context.bot.send_document(chat_id=query.message.chat_id, document=open(f, 'rb'))#open with binary file and send data
+                except TimeoutError :
+                    context.bot.send_message(chat_id=update.effective_chat.id, text="Tansfer timeout, place try again later")
+                    video.removeIns()
+            context.bot.send_message(chat_id=update.effective_chat.id, text="Finished")
+            video.removeIns()
+        except BadLink:
+            update.message.reply_text("Bad link")
+        return
     try:
         video = Video(update.message.text, init_keyboard=True)
     except BadLink:

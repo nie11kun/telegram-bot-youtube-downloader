@@ -25,6 +25,7 @@ class Video:
         self.extension = None
         self.serialNumber = None
         self.videoSite = None
+        self.shortcode = None
         self.downloadPath = '/tmp/'
         self.outputFileName = '%(title)s.%(ext)s' # use youtube-dl build-in parameters
 
@@ -142,6 +143,22 @@ class Video:
             self.extension = '.' + \
                 self.file_name.split('.')[-1]  # last matched
 
+    @contextmanager  # run this function with new defined send function
+    def insDownload(self):
+        shortcode = re.search('instagram\.com\/p\/(.*)\/\?', self.link).group(1)
+        self.shortcode = shortcode
+        if shortcode == None:
+            raise BadLink
+        cmd = 'instaloader --dirname-pattern={0}{1} -- -{2}'.format(
+            self.downloadPath, shortcode, shortcode)  # download video command
+        p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+        for line in p[0].decode("utf-8", 'ignore').split('\n'):
+            if "404 Not Found" in line:
+                raise BadLink
+    
+        yield glob.glob(self.downloadPath + shortcode + '/*.jpg')
+        yield glob.glob(self.downloadPath + shortcode + '/*.mp4')
+
     def check_dimension(self):
         '''
         if self.extension == '.m4a':
@@ -244,3 +261,7 @@ class Video:
         files = glob.glob(self.downloadPath + self.real_file_name + '*')
         for f in files:  # removing old files
             os.remove(f)
+
+    def removeIns(self):
+        dir = self.downloadPath + self.shortcode
+        shutil.rmtree(dir)
