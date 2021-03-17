@@ -149,7 +149,7 @@ class Video:
         self.shortcode = shortcode
         if shortcode == None:
             raise BadLink
-        cmd = 'instaloader --dirname-pattern="{0}{1}" -- -{2}'.format(
+        cmd = 'instaloader --login marco_nie_ --dirname-pattern="{0}{1}" -- -{2}'.format(
             self.downloadPath, shortcode, shortcode)
         # print(cmd)
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
