@@ -27,6 +27,7 @@ class Video:
         self.videoSite = None
         self.shortcode = None
         self.downloadPath = '/tmp/'
+        self.insAccount = 'YOUR_ACCOUNT'
         self.outputFileName = '%(title)s.%(ext)s' # use youtube-dl build-in parameters
 
         if init_keyboard:
@@ -149,8 +150,8 @@ class Video:
         self.shortcode = shortcode
         if shortcode == None:
             raise BadLink
-        cmd = 'instaloader --login marco_nie_ --dirname-pattern="{0}{1}" -- -{2}'.format(
-            self.downloadPath, shortcode, shortcode)
+        cmd = 'instaloader --login {3} --dirname-pattern="{0}{1}" -- -{2}'.format(
+            self.downloadPath, self.shortcode, self.shortcode, self.insAccount)
         # print(cmd)
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
