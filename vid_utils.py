@@ -177,7 +177,7 @@ class Video:
             #os.system('ffmpeg -i {} -fs 49M -c copy {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg' + self.extension))
 
             video_bitrate = self.get_video_bitrate(self.file_path)
-            split_length = 45 * 8192 / (video_bitrate / 1024)
+            split_length = 49 * 8192 / (video_bitrate / 1024)
             split_length = int(split_length)
             print('split_length is: {}'.format(split_length))
 
