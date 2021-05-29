@@ -80,7 +80,7 @@ def dl_cmd(update, context):
 
     dispatcher.remove_handler(get_media_hd)
     dispatcher.remove_handler(dl_media_hd)
-    dispatcher.add_handler(echo_hd)
+    dispatcher.add_handler(echo_hd = MessageHandler(Filters.text, echo))
 
 def echo(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="please send me right command!")
