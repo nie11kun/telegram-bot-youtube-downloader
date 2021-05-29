@@ -73,14 +73,12 @@ def help_cmd(update, context):
 
 def dl_cmd(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="send me the media url")
-    dispatcher.remove_handler(MessageHandler(Filters.text, echo))
 
     get_media_hd = dispatcher.add_handler(MessageHandler(Filters.text, get_format))
     dl_media_hd = dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
 
     dispatcher.remove_handler(get_media_hd)
     dispatcher.remove_handler(dl_media_hd)
-    echo_hd = dispatcher.add_handler(MessageHandler(Filters.text, echo))
 
 def echo(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="please send me right command!")
@@ -91,7 +89,7 @@ def error(update, context, error):
 
 help_hd = dispatcher.add_handler(CommandHandler("help", help_cmd))
 dl_hd = dispatcher.add_handler(CommandHandler("dl", dl_cmd))
-echo_hd = dispatcher.add_handler(MessageHandler(Filters.text, echo))
+#echo_hd = dispatcher.add_handler(MessageHandler(Filters.text, echo))
 error_hd = dispatcher.add_error_handler(error)
 
 updater.start_polling()
