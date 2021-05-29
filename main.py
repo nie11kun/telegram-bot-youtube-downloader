@@ -77,7 +77,7 @@ def dl_cmd(update, context):
     dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
 
 def echo(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=update.effective_chat.text)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
 def error(update, context, error):
     context.bot.send_message(chat_id=update.effective_chat.id, text=('"%s" caused error "%s"', context, error))
