@@ -76,13 +76,14 @@ def dl_cmd(update, context):
     dispatcher.remove_handler(echo_hd)
 
     get_media_hd = dispatcher.add_handler(MessageHandler(Filters.text, get_format))
-    help_hd = dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
-    
+    dl_media_hd = dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
+
     dispatcher.remove_handler(get_media_hd)
+    dispatcher.remove_handler(dl_media_hd)
     dispatcher.add_handler(echo_hd)
 
 def echo(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+    context.bot.send_message(chat_id=update.effective_chat.id, text="please send me right command!")
 
 def error(update, context, error):
     context.bot.send_message(chat_id=update.effective_chat.id, text=('"%s" caused error "%s"', context, error))
