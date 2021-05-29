@@ -70,7 +70,7 @@ def download_choosen_format(update, context):
 
 def help_cmd(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=
-       "This is Marco's personal Bot" +
+       "This is Marco's personal Bot\n"
        "It can do some amazing jobs!")
 
 dispatcher.add_handler(CommandHandler("help", help_cmd))
