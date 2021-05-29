@@ -68,7 +68,7 @@ def download_choosen_format(update, context):
 
 def help_cmd(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=
-       "This is Marco's personal Bot\n"
+       "This is Marco's personal Bot.\n\n"
        "It can do some amazing jobs!")
 
 def dl_cmd(update, context):
@@ -76,8 +76,17 @@ def dl_cmd(update, context):
     dispatcher.add_handler(MessageHandler(Filters.text, get_format))
     dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
 
+def echo(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text=update.effective_chat.text)
+
+def error(update, context, error):
+    context.bot.send_message(chat_id=update.effective_chat.id, text=('"%s" caused error "%s"', context, error))
+    logger.warning('"%s" caused error "%s"', context, error)
+
 dispatcher.add_handler(CommandHandler("help", help_cmd))
 dispatcher.add_handler(CommandHandler("dl", dl_cmd))
+dispatcher.add_handler(MessageHandler(Filters.text, echo))
+dispatcher.add_error_handler(error)
 
 updater.start_polling()
 updater.idle()
