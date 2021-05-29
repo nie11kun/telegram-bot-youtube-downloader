@@ -6,12 +6,10 @@ from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters,
 from vid_utils import Video, BadLink
 
 updater = Updater(token='YOUR TOKEN', use_context=True)
-
 dispatcher = updater.dispatcher
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 def get_format(update, context):
     query = update.callback_query
@@ -73,9 +71,13 @@ def help_cmd(update, context):
        "This is Marco's personal Bot\n"
        "It can do some amazing jobs!")
 
+def dl_cmd(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="send me the media url")
+    dispatcher.add_handler(MessageHandler(Filters.text, get_format))
+    dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
+
 dispatcher.add_handler(CommandHandler("help", help_cmd))
-dispatcher.add_handler(MessageHandler(Filters.text, get_format))
-dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
+dispatcher.add_handler(CommandHandler("dl", dl_cmd))
 
 updater.start_polling()
 updater.idle()
