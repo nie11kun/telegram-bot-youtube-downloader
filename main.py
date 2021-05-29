@@ -73,7 +73,7 @@ def help_cmd(update, context):
 
 def dl_cmd(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="send me the media url")
-    dispatcher.remove_handler(echo_hd)
+    dispatcher.remove_handler(MessageHandler(Filters.text, echo))
 
     get_media_hd = dispatcher.add_handler(MessageHandler(Filters.text, get_format))
     dl_media_hd = dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
