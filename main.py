@@ -69,10 +69,9 @@ def download_choosen_format(update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text=file_link)
 
 def help_cmd(update, context):
-   context.effective_message.reply_text(
+    context.bot.send_message(chat_id=update.effective_chat.id, text=
        "This is Marco's personal Bot" +
-       "It can do some amazing jobs!"
-   )
+       "It can do some amazing jobs!")
 
 dispatcher.add_handler(CommandHandler("help", help_cmd))
 dispatcher.add_handler(MessageHandler(Filters.text, get_format))
