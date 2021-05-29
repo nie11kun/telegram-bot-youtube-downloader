@@ -1,7 +1,7 @@
 import logging
 
 from telegram import InlineKeyboardMarkup
-from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters
+from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters, CommandHandler
 
 from vid_utils import Video, BadLink
 
@@ -68,6 +68,13 @@ def download_choosen_format(update, context):
         file_link = video.send_link()
         context.bot.send_message(chat_id=update.effective_chat.id, text=file_link)
 
+def help_cmd(update, context):
+   context.effective_message.reply_text(
+       "This is Marco's personal Bot" +
+       "It can do some amazing jobs!"
+   )
+
+dispatcher.add_handler(CommandHandler("help", help_cmd))
 dispatcher.add_handler(MessageHandler(Filters.text, get_format))
 dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
 
