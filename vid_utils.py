@@ -145,7 +145,7 @@ class Video:
                 self.file_name.split('.')[-1]  # last matched
 
     def insDownload(self):
-        shortcode = re.search('instagram\.com\/p\/(.*)\/\?', self.link).group(1)
+        shortcode = re.search('instagram\.com\/(p|reel)\/(.*)\/\?', self.link).group(2)
         # print(shortcode)
         self.shortcode = shortcode
         if shortcode == None:
