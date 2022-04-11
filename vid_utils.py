@@ -28,7 +28,7 @@ class Video:
         self.shortcode = None
         self.downloadPath = '/tmp/'
         self.insAccount = os.getenv('INS_ACCOUNT')
-        self.outputFileName = '%(title)s.%(ext)s' # use youtube-dl build-in parameters
+        self.outputFileName = '%(title)s.%(ext)s' # use yt-dlp build-in parameters
 
         if init_keyboard:
             self.formats = self.get_formats()
@@ -38,7 +38,7 @@ class Video:
         formats = []
 
         # this command return the video info to string
-        cmd = "youtube-dl --no-check-certificate -F {}".format(self.link)
+        cmd = "yt-dlp -F {}".format(self.link)
 
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
         # creat subprocess,args is a string, the string is interpreted as the name or path of the program to execute
@@ -108,9 +108,9 @@ class Video:
             self.link = site['pornhub'] + self.link.split(':')[1]
         if 'twitter:' in self.link:
             self.link = site['twitter'] + self.link.split(':')[1]
-            self.outputFileName = '%(id)s.%(ext)s' # use youtube-dl build-in parameters
+            self.outputFileName = '%(id)s.%(ext)s' # use yt-dlp build-in parameters
 
-        cmd = 'youtube-dl --no-check-certificate -f {0} {1} -o "{2}"'.format(
+        cmd = 'yt-dlp -f {0} {1} -o "{2}"'.format(
             resolution_code, self.link, self.downloadPath + self.outputFileName)  # download video command
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
