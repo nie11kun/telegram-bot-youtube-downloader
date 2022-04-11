@@ -43,7 +43,7 @@ def get_format(update, context):
             update.message.reply_text("Bad link")
         else:
             reply_markup = InlineKeyboardMarkup(video.keyboard)
-            update.message.reply_text('Choose format:', reply_markup=reply_markup)
+            update.message.reply_text('Choose format:', reply_markup=reply_markup, timeout=20)
 
 def download_choosen_format(update, context):
     query = update.callback_query
