@@ -32,22 +32,21 @@ def get_format(update, context):
         except BadLink:
             update.message.reply_text("Bad link")
         return
-    try:
-        video = Video(update.message.text, init_keyboard=True)
-    except BadLink:
-        update.message.reply_text("Bad link")
     else:
-        reply_markup = InlineKeyboardMarkup(video.keyboard)
-        update.message.reply_text('Choose format:', reply_markup=reply_markup)
-
+        try:
+            dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
+            video = Video(update.message.text, init_keyboard=True)
+        except BadLink:
+            update.message.reply_text("Bad link")
+        else:
+            reply_markup = InlineKeyboardMarkup(video.keyboard)
+            update.message.reply_text('Choose format:', reply_markup=reply_markup)
 
 def download_choosen_format(update, context):
     query = update.callback_query
     resolution_code, link, send_type = query.data.split(' ', 2)#setting the max parameter to 1, will return a list with 2 elements!
 
-    context.bot.edit_message_text(text="Downloading...",
-                          chat_id=query.message.chat_id,
-                          message_id=query.message.message_id)
+    context.bot.edit_message_text(text="Downloading...", chat_id=query.message.chat_id, message_id=query.message.message_id)
 
     video = Video(link)
     video.download(resolution_code)
@@ -73,9 +72,9 @@ def help_cmd(update, context):
 
 def dl_cmd(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="send me the media url")
-    get_media_hd = dispatcher.add_handler(MessageHandler(Filters.text, get_format))
-    dl_media_hd = dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
-    
+    dispatcher.add_handler(MessageHandler(Filters.text & (Filters.regex(r'^http')), get_format))
+    dispatcher.add_handler(MessageHandler(~Filters.regex(r'^http'), echo))
+
 def echo(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="please send me right command!")
 
@@ -83,10 +82,10 @@ def error(update, context, error):
     context.bot.send_message(chat_id=update.effective_chat.id, text=('"%s" caused error "%s"', context, error))
     logger.warning('"%s" caused error "%s"', context, error)
 
-help_hd = dispatcher.add_handler(CommandHandler("help", help_cmd))
-dl_hd = dispatcher.add_handler(CommandHandler("dl", dl_cmd))
-#echo_hd = dispatcher.add_handler(MessageHandler(Filters.text, echo))
-error_hd = dispatcher.add_error_handler(error)
+dispatcher.add_handler(CommandHandler("help", help_cmd))
+dispatcher.add_handler(CommandHandler("dl", dl_cmd))
+dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command) & (~Filters.regex(r'^http')), echo))
+dispatcher.add_error_handler(error)
 
 updater.start_polling()
 updater.idle()

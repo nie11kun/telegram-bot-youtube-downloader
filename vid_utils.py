@@ -4,10 +4,10 @@ import glob
 import math
 import shlex
 import shutil
-import sitealias
 from subprocess import Popen, PIPE, check_output
 from time import strftime, strptime, sleep
 from contextlib import contextmanager
+from sitealias import site
 
 from telegram import InlineKeyboardButton
 
@@ -103,11 +103,11 @@ class Video:
 
     def download(self, resolution_code):
         if 'youtube:' in self.link:
-            self.link = sitealias.site['youtube'] + self.link.split(':')[1] # regenerate link
+            self.link = site['youtube'] + self.link.split(':')[1] # regenerate link
         if 'pornhub:' in self.link:
-            self.link = sitealias.site['pornhub'] + self.link.split(':')[1]
+            self.link = site['pornhub'] + self.link.split(':')[1]
         if 'twitter:' in self.link:
-            self.link = sitealias.site['twitter'] + self.link.split(':')[1]
+            self.link = site['twitter'] + self.link.split(':')[1]
             self.outputFileName = '%(id)s.%(ext)s' # use youtube-dl build-in parameters
 
         cmd = 'youtube-dl --no-check-certificate -f {0} {1} -o "{2}"'.format(
