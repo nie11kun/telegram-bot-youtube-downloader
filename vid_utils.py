@@ -179,7 +179,7 @@ class Video:
             #os.system('ffmpeg -i {} -fs 49M -c copy {}'.format(self.file_path, self.downloadPath + self.real_file_name + '_ffmpeg' + self.extension))
 
             video_bitrate = self.get_video_bitrate(self.file_path)
-            split_length = 45 * 8192 / (video_bitrate / 1024)
+            split_length = 40 * 8192 / (video_bitrate / 1024)
             split_length = int(split_length)
             print('split_length is: {}'.format(split_length))
 
@@ -249,10 +249,10 @@ class Video:
                 self.downloadPath + self.real_file_name + "-" + \
                 str(n+1) + "-of-" + str(split_count) + self.extension
 
-            try:
-                os.remove(self.downloadPath + self.real_file_name + "-*")
-            except FileNotFoundError:
-                break
+            # try:
+            #     os.remove(self.downloadPath + self.real_file_name + "-*")
+            # except FileNotFoundError:
+            #     break
 
             cmd = '{} {}'.format(split_cmd, split_args)
             p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
