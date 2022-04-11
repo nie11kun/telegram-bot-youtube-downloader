@@ -78,6 +78,8 @@ class Video:
                     raise StopIteration  # Usually the last line is empty
                 if "video only" in line:
                     continue  # I don't need video without audio
+                if "mhtml" in line:
+                    continue
                 if "webm" in line:
                     continue
                 if "3gp" in line:
