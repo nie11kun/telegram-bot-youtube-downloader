@@ -58,8 +58,11 @@ def download_choosen_format(update, context):
             for f in files:
                 try:
                     context.bot.send_document(chat_id=query.message.chat_id, document=open(f, 'rb'), timeout=600)#open with binary file and send data
-                except TimeoutError :
+                except TimeoutError:
                     context.bot.send_message(chat_id=update.effective_chat.id, text="Tansfer timeout, place try again later")
+                    video.remove()
+                except NetworkError:
+                    context.bot.send_message(chat_id=update.effective_chat.id, text="file size too large, can not sent more than 50MB file")
                     video.remove()
             context.bot.send_message(chat_id=update.effective_chat.id, text="Finished")
             video.remove()
