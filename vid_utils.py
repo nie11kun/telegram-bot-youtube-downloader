@@ -248,6 +248,9 @@ class Video:
             split_args = "-ss " + str(split_start) + " -t " + str(split_length) + " " + \
                 self.downloadPath + self.real_file_name + "-" + \
                 str(n+1) + "-of-" + str(split_count) + self.extension
+
+            os.remove(self.downloadPath + self.real_file_name + "-*")
+
             cmd = '{} {}'.format(split_cmd, split_args)
             p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
