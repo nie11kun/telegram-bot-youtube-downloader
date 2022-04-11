@@ -4,6 +4,7 @@ import logging
 import os
 from telegram import InlineKeyboardMarkup
 from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters, CommandHandler
+from telegram.error import NetworkError
 
 from vid_utils import Video, BadLink
 
