@@ -249,10 +249,10 @@ class Video:
                 self.downloadPath + self.real_file_name + "-" + \
                 str(n+1) + "-of-" + str(split_count) + self.extension
 
-            try:
-                os.remove(self.downloadPath + self.real_file_name + "-*")
-            except FileNotFoundError:
-                continue
+            #try:
+            #    os.remove(self.downloadPath + self.real_file_name + "-*")
+            #except FileNotFoundError:
+            #    continue
 
             cmd = '{} {}'.format(split_cmd, split_args)
             p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
