@@ -1,11 +1,13 @@
-import logging
+# 运行前需要定义系统环境变量：BOT_TOKEN, INS_ACCOUNT
 
+import logging
+import os
 from telegram import InlineKeyboardMarkup
 from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters, CommandHandler
 
 from vid_utils import Video, BadLink
 
-updater = Updater(token='YOUR TOKEN', use_context=True)
+updater = Updater(token=os.getenv('BOT_TOKEN'), use_context=True)
 dispatcher = updater.dispatcher
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)

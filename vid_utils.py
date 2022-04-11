@@ -27,7 +27,7 @@ class Video:
         self.videoSite = None
         self.shortcode = None
         self.downloadPath = '/tmp/'
-        self.insAccount = 'YOUR_ACCOUNT'
+        self.insAccount = os.getenv('INS_ACCOUNT')
         self.outputFileName = '%(title)s.%(ext)s' # use youtube-dl build-in parameters
 
         if init_keyboard:
