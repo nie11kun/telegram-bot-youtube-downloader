@@ -62,9 +62,15 @@ def download_choosen_format(update, context):
                 except TimeoutError:
                     context.bot.send_message(chat_id=update.effective_chat.id, text="Tansfer timeout, place try again later")
                     video.remove()
+                    break
                 except NetworkError:
                     context.bot.send_message(chat_id=update.effective_chat.id, text="file size too large, can not sent more than 50MB file")
                     video.remove()
+                    break
+                except FileNotFoundError:
+                    context.bot.send_message(chat_id=update.effective_chat.id, text="file not found")
+                    video.remove()
+                    break
             context.bot.send_message(chat_id=update.effective_chat.id, text="Finished")
             video.remove()
     else:
