@@ -66,7 +66,7 @@ class Video:
                         break
                     break
 
-            while "RESOLUTION FPS" not in next(it):
+            while "-------------" not in next(it):
                 pass  # if has not this string then goto next line
         except StopIteration:
             raise BadLink  # Isn't a valid link
