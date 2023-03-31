@@ -3,7 +3,7 @@
 import logging
 import os
 from telegram import InlineKeyboardMarkup
-from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters, CommandHandler
+from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, filters, CommandHandler
 from telegram.error import NetworkError
 
 from vid_utils import Video, BadLink
@@ -84,8 +84,8 @@ def help_cmd(update, context):
 
 def dl_cmd(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="send me the media url")
-    dispatcher.add_handler(MessageHandler(Filters.text & (Filters.regex(r'^http')), get_format))
-    dispatcher.add_handler(MessageHandler(~Filters.regex(r'^http'), echo))
+    dispatcher.add_handler(MessageHandler(filters.text & (filters.regex(r'^http')), get_format))
+    dispatcher.add_handler(MessageHandler(~filters.regex(r'^http'), echo))
 
 def echo(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="please send me right command!")
@@ -96,7 +96,7 @@ def error(update, context, error):
 
 dispatcher.add_handler(CommandHandler("help", help_cmd))
 dispatcher.add_handler(CommandHandler("dl", dl_cmd))
-dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command) & (~Filters.regex(r'^http')), echo))
+dispatcher.add_handler(MessageHandler(filters.text & (~filters.command) & (~filters.regex(r'^http')), echo))
 dispatcher.add_error_handler(error)
 
 updater.start_polling()
