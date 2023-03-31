@@ -9,7 +9,7 @@ from telegram.error import NetworkError
 from vid_utils import Video, BadLink
 
 bot = Bot(token=os.getenv('BOT_TOKEN'))
-updater = Updater(bot=bot)
+updater = Updater(bot=bot, workers=4, use_context=True)
 dispatcher = updater.dispatcher
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
