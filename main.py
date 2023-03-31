@@ -2,13 +2,14 @@
 
 import logging
 import os
-from telegram import InlineKeyboardMarkup
+from telegram import InlineKeyboardMarkup, Bot
 from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, filters, CommandHandler
 from telegram.error import NetworkError
 
 from vid_utils import Video, BadLink
 
-updater = Updater(token=os.getenv('BOT_TOKEN'), use_context=True)
+bot = Bot(token=os.getenv('BOT_TOKEN'))
+updater = Updater(bot=bot, use_context=True)
 dispatcher = updater.dispatcher
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
