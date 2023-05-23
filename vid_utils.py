@@ -120,6 +120,7 @@ class Video:
 
         cmd = 'yt-dlp -f {0} {1} -o "{2}"'.format(
             resolution_code, self.link, self.downloadPath + self.outputFileName)  # download video command
+        print(cmd)
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
