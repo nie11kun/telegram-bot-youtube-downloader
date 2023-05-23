@@ -122,6 +122,7 @@ class Video:
             resolution_code, self.link, self.downloadPath + self.outputFileName)  # download video command
         # print(cmd)
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+        print(p[0])
 
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
             if "[download] Destination:" in line:
