@@ -120,7 +120,7 @@ class Video:
 
         cmd = 'yt-dlp -f {0} {1} -o "{2}"'.format(
             resolution_code, self.link, self.downloadPath + self.outputFileName)  # download video command
-        print(cmd)
+        # print(cmd)
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
         for line in p[0].decode("utf-8", 'ignore').split('\n'):
@@ -135,11 +135,11 @@ class Video:
         # new_fn = self.file_name.replace(
         #     ' ', '_').replace('[', '_').replace(']', '_').replace('，', '_').replace(',', '_').replace('：', '_').replace(':', '_')
         
-        new_fn=""
+        new_fn=self.file_name
         try:
             new_fn = re.sub('[\s\，\,\]\[\:\：【】\?\？\"\“\”#《》。]', '_', self.file_name)
         except TypeError:
-            new_fn=self.file_name
+            print("change name false")
 
         new_fp = self.downloadPath + new_fn
         os.system('mv "{0}" "{1}"'.format(self.file_path, new_fp))
