@@ -9,3 +9,14 @@
 [info] 1mmIPdZkHE8: Downloading 1 format(s): 398
 [download] /tmp/123.mp4 has already been downloaded
 [download] 100% of 71.08MiB
+
+
+[twitter] Extracting URL: https://twitter.com/i/status/1660616592349364225
+[twitter] 1660616592349364225: Downloading guest token
+[twitter] 1660616592349364225: Downloading JSON metadata
+[twitter] 1660616592349364225: Downloading m3u8 information
+[info] 1660614759962791937: Downloading 1 format(s): hls-256
+[hlsnative] Downloading m3u8 manifest
+[hlsnative] Total fragments: 21
+[download] Destination: /tmp/1660614759962791937.mp4
+[download] 100% of  937.34KiB in 00:00:00 at 1.92MiB/s
