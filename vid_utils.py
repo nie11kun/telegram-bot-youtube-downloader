@@ -140,7 +140,7 @@ class Video:
             new_fn = re.sub('[\s\，\,\]\[\:\：【】\?\？\"\“\”#《》。]', '_', self.file_name)
         except TypeError:
             print("change name false")
-            new_fn=self.file_name
+            new_fn=str(self.file_name)
 
         new_fp = self.downloadPath + new_fn
         os.system('mv "{0}" "{1}"'.format(self.file_path, new_fp))
