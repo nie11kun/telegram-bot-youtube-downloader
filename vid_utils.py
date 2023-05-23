@@ -62,7 +62,7 @@ class Video:
                         self.link = 'pornhub:' + self.serialNumber # prevent link too long to issue keyboard call back error
                         break
                     if 'twitter.com' in self.link:
-                        self.link = 'twitter:' + self.serialNumber
+                        self.link = self.link
                         break
                     break
 
@@ -132,6 +132,8 @@ class Video:
                 elif "has already been downloaded" in line:
                     self.file_path = line[11:-28]
                     self.file_name = self.file_path.split('/')[-1]
+                elif "ERROR:" in line:
+                    raise BadLink
 
         print(self.file_path)
         print(self.file_name)

@@ -46,3 +46,18 @@ WARNING: Falling back on generic information extractor.
 [generic] niekun: Downloading webpage
 [generic] niekun: Extracting information
 ERROR: Unsupported URL: https://niekun.net/
+
+
+[twitter] Extracting URL: https://twitter.com/i/status/1660616592349364225
+[twitter] 1660616592349364225: Downloading guest token
+[twitter] 1660616592349364225: Downloading JSON metadata
+[twitter] 1660616592349364225: Downloading m3u8 information
+[info] Available formats for 1660614759962791937:
+ID        EXT RESOLUTION │  FILESIZE   TBR PROTO │ VCODEC        VBR ACODEC    ABR
+──────────────────────────────────────────────────────────────────────────────────
+hls-256   mp4 406x270    │ ~ 1.93MiB  256k m3u8  │ avc1.4d001e  256k mp4a.40.2  0k
+http-256  mp4 406x270    │ ~ 1.93MiB  256k https │ unknown      256k unknown    0k
+hls-832   mp4 542x360    │ ~ 6.28MiB  832k m3u8  │ avc1.4d001f  832k mp4a.40.2  0k
+http-832  mp4 542x360    │ ~ 6.28MiB  832k https │ unknown      832k unknown    0k
+hls-2176  mp4 1086x720   │ ~16.42MiB 2176k m3u8  │ avc1.640020 2176k mp4a.40.2  0k
+http-2176 mp4 1086x720   │ ~16.42MiB 2176k https │ unknown     2176k unknown    0k

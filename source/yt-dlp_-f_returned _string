@@ -21,8 +21,13 @@
 [download] Destination: /tmp/1660614759962791937.mp4
 [download] 100% of  937.34KiB in 00:00:00 at 1.92MiB/s
 
+
 [twitter] Extracting URL: https://twitter.com/i/status/1660614759962791937
 [twitter] 1660614759962791937: Downloading guest token
 [twitter] 1660614759962791937: Downloading JSON metadata
 [twitter] 1660614759962791937: Downloading guest token
 [twitter] 1660614759962791937: Downloading JSON metadata
+
+
+WARNING: [twitter] Twitter API gave 404 response, retrying with deprecated auth token. Only one media item can be extracted
+ERROR: [twitter] 1660614759962791937: Unable to download JSON metadata: HTTP Error 404: Not Found (caused by <HTTPError 404: 'Not Found'>); please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U
