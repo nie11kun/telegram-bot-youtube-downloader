@@ -135,7 +135,7 @@ class Video:
         # new_fn = self.file_name.replace(
         #     ' ', '_').replace('[', '_').replace(']', '_').replace('，', '_').replace(',', '_').replace('：', '_').replace(':', '_')
         
-        new_fn=self.file_name
+        new_fn=str()
         try:
             new_fn = re.sub('[\s\，\,\]\[\:\：【】\?\？\"\“\”#《》。]', '_', self.file_name)
         except TypeError:
