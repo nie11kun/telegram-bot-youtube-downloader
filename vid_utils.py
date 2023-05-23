@@ -62,7 +62,7 @@ class Video:
                         self.link = 'pornhub:' + self.serialNumber # prevent link too long to issue keyboard call back error
                         break
                     if 'twitter.com' in self.link:
-                        self.link = self.link
+                        self.link = self.link# twitter's serialNumber data is not correct, so just use origernal link
                         break
                     break
 
@@ -124,7 +124,7 @@ class Video:
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
 
         for i in range(2):
-            print(p[i])
+            # print(p[i])
             for line in p[i].decode("utf-8", 'ignore').split('\n'):
                 if "[download] Destination:" in line:
                     self.file_path = line[24:]
@@ -135,8 +135,8 @@ class Video:
                 elif "ERROR:" in line:
                     raise BadLink
 
-        print(self.file_path)
-        print(self.file_name)
+        # print(self.file_path)
+        # print(self.file_name)
 
         # new_fn = self.file_name.replace(
         #     ' ', '_').replace('[', '_').replace(']', '_').replace('，', '_').replace(',', '_').replace('：', '_').replace(':', '_')
