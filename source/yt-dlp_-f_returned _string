@@ -20,3 +20,9 @@
 [hlsnative] Total fragments: 21
 [download] Destination: /tmp/1660614759962791937.mp4
 [download] 100% of  937.34KiB in 00:00:00 at 1.92MiB/s
+
+[twitter] Extracting URL: https://twitter.com/i/status/1660614759962791937
+[twitter] 1660614759962791937: Downloading guest token
+[twitter] 1660614759962791937: Downloading JSON metadata
+[twitter] 1660614759962791937: Downloading guest token
+[twitter] 1660614759962791937: Downloading JSON metadata

@@ -124,13 +124,14 @@ class Video:
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
         print(p[0])
 
-        for line in p[0].decode("utf-8", 'ignore').split('\n'):
-            if "[download] Destination:" in line:
-                self.file_path = line[24:]
-                self.file_name = self.file_path.split('/')[-1]  # name of the file
-            elif "has already been downloaded" in line:
-                self.file_path = line[11:-28]
-                self.file_name = self.file_path.split('/')[-1]
+        for i in range(2):
+            for line in p[i].decode("utf-8", 'ignore').split('\n'):
+                if "[download] Destination:" in line:
+                    self.file_path = line[24:]
+                    self.file_name = self.file_path.split('/')[-1]  # name of the file
+                elif "has already been downloaded" in line:
+                    self.file_path = line[11:-28]
+                    self.file_name = self.file_path.split('/')[-1]
 
         print(self.file_path)
         print(self.file_name)
