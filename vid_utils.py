@@ -61,7 +61,7 @@ class Video:
                     if 'pornhub.com' in self.link:
                         self.link = 'pornhub:' + self.serialNumber # prevent link too long to issue keyboard call back error
                         break
-                    if 'twitter.com' in self.link:
+                    if 'x.com' in self.link:
                         self.link = self.link# twitter's serialNumber data is not correct, so just use origernal link
                         break
                     break
@@ -114,8 +114,8 @@ class Video:
             self.link = site['youtube'] + self.link.split(':')[1] # regenerate link
         if 'pornhub:' in self.link:
             self.link = site['pornhub'] + self.link.split(':')[1]
-        if 'twitter:' in self.link:
-            self.link = site['twitter'] + self.link.split(':')[1]
+        if 'x.com:' in self.link:
+            # self.link = site['x'] + self.link.split(':')[1]
             self.outputFileName = '%(id)s.%(ext)s' # use yt-dlp build-in parameters
 
         cmd = 'yt-dlp -f {0} {1} -o "{2}"'.format(
