@@ -61,7 +61,7 @@ class Video:
                     if 'pornhub.com' in self.link:
                         self.link = 'pornhub:' + self.serialNumber # prevent link too long to issue keyboard call back error
                         break
-                    if 'x.com' in self.link:
+                    if 'x.com' or 'twitter.com' in self.link:
                         self.link = self.link# twitter's serialNumber data is not correct, so just use origernal link
                         break
                     break
