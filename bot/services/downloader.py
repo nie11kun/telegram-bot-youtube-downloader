@@ -15,9 +15,6 @@ class DownloadService:
             'outtmpl': f'{settings.TEMP_DIR}/%(id)s_%(title)s.%(ext)s',
             'restrictfilenames': True,  # ASCII only filenames
             'cookiefile': 'cookies.txt',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            }
         }
 
     async def get_info(self, url: str) -> Dict[str, Any]:
