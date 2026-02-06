@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 class DownloadService:
     def __init__(self):
         self.ydl_opts_base = {
-            'quiet': True,
-            'no_warnings': True,
+            'quiet': False, # Disable quiet to see logs
+            'verbose': True, # Enable verbose for debugging
+            'no_warnings': False,
             'outtmpl': f'{settings.TEMP_DIR}/%(id)s_%(title)s.%(ext)s',
             'restrictfilenames': True,  # ASCII only filenames
             'cookiefile': 'cookies.txt',
