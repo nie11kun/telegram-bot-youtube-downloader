@@ -1,103 +1,37 @@
-# 运行前需要定义系统环境变量：BOT_TOKEN, INS_ACCOUNT
-
 import logging
 import os
-from telegram import InlineKeyboardMarkup
-from telegram.ext import Updater, CallbackQueryHandler, MessageHandler, Filters, CommandHandler
-from telegram.error import NetworkError
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters
+from bot.config import settings
+from bot.handlers import start_cmd, help_cmd, handle_link, download_callback
 
-from vid_utils import Video, BadLink
+# Setup logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
-updater = Updater(token=os.getenv('BOT_TOKEN'), use_context=True)
-dispatcher = updater.dispatcher
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-def get_format(update, context):
-    query = update.callback_query
-    logger.info("from {}: {}".format(update.message.chat_id, update.message.text)) # "history"
-
-    if 'instagram.com' in update.message.text:
-        video = Video(update.message.text)
-        try:
-            video.insDownload()
-
-            with video.send_ins() as files:
-                for f in files:
-                    try:
-                        context.bot.send_document(chat_id=update.effective_chat.id, document=open(f, 'rb'), timeout=600)#open with binary file and send data
-                    except TimeoutError :
-                        context.bot.send_message(chat_id=update.effective_chat.id, text="Tansfer timeout, place try again later")
-                        video.removeIns()
-                context.bot.send_message(chat_id=update.effective_chat.id, text="Finished")
-                video.removeIns()
-        except BadLink:
-            update.message.reply_text("Bad link")
+def main():
+    if not settings.BOT_TOKEN:
+        print("Error: BOT_TOKEN not set!")
         return
-    else:
-        try:
-            dispatcher.add_handler(CallbackQueryHandler(download_choosen_format))# call back query
-            video = Video(update.message.text, init_keyboard=True)
-        except BadLink:
-            update.message.reply_text("Bad link")
-        else:
-            reply_markup = InlineKeyboardMarkup(video.keyboard)
-            update.message.reply_text('Choose format:', reply_markup=reply_markup, timeout=20)
 
-def download_choosen_format(update, context):
-    query = update.callback_query
-    resolution_code, link, send_type = query.data.split(' ', 2)#setting the max parameter to 1, will return a list with 2 elements!
+    application = ApplicationBuilder().token(settings.BOT_TOKEN).build()
 
-    context.bot.edit_message_text(text="Downloading...", chat_id=query.message.chat_id, message_id=query.message.message_id)
+    # Commands
+    application.add_handler(CommandHandler("start", start_cmd))
+    application.add_handler(CommandHandler("help", help_cmd))
 
-    video = Video(link)
-    video.download(resolution_code)
+    # Callbacks
+    application.add_handler(CallbackQueryHandler(download_callback))
 
-    if send_type == 'file':
-        with video.send_file() as files:
-            for f in files:
-                try:
-                    context.bot.send_document(chat_id=query.message.chat_id, document=open(f, 'rb'), timeout=600)#open with binary file and send data
-                except TimeoutError:
-                    context.bot.send_message(chat_id=update.effective_chat.id, text="Tansfer timeout, place try again later")
-                    video.remove()
-                    break
-                except NetworkError:
-                    context.bot.send_message(chat_id=update.effective_chat.id, text="file size too large, can not sent more than 50MB file")
-                    video.remove()
-                    break
-                except FileNotFoundError:
-                    context.bot.send_message(chat_id=update.effective_chat.id, text="file not found")
-                    video.remove()
-                    break
-            context.bot.send_message(chat_id=update.effective_chat.id, text="Finished")
-            video.remove()
-    else:
-        file_link = video.send_link()
-        context.bot.send_message(chat_id=update.effective_chat.id, text=file_link)
+    # Messages (Links)
+    # Filter for standard HTTP links. 
+    # Note: Telegram entity filters are better but regex is simple and effective for now.
+    http_filter = filters.Regex(r'^http')
+    application.add_handler(MessageHandler(filters.TEXT & http_filter, handle_link))
 
-def help_cmd(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=
-       "This is Marco's personal Bot.\n\n"
-       "It can do some amazing jobs!")
+    print("Bot is running...")
+    application.run_polling()
 
-def dl_cmd(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="send me the media url")
-    dispatcher.add_handler(MessageHandler(Filters.text & (Filters.regex(r'^http')), get_format))
-    dispatcher.add_handler(MessageHandler(~Filters.regex(r'^http'), echo))
-
-def echo(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="please send me right command!")
-
-def error(update, context, error):
-    context.bot.send_message(chat_id=update.effective_chat.id, text=('"%s" caused error "%s"', context, error))
-    logger.warning('"%s" caused error "%s"', context, error)
-
-dispatcher.add_handler(CommandHandler("help", help_cmd))
-dispatcher.add_handler(CommandHandler("dl", dl_cmd))
-dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command) & (~Filters.regex(r'^http')), echo))
-dispatcher.add_error_handler(error)
-
-updater.start_polling()
-updater.idle()
+if __name__ == '__main__':
+    main()
