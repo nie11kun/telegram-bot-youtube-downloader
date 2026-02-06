@@ -2,6 +2,7 @@ import os
 import asyncio
 import logging
 import math
+from typing import List
 from bot.config import settings
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ class MediaProcessor:
         except ValueError:
             return 0.0
 
-    async def split_file(self, file_path: str, chunk_size_bytes: int = settings.MAX_FILE_SIZE) -> list[str]:
+    async def split_file(self, file_path: str, chunk_size_bytes: int = settings.MAX_FILE_SIZE) -> List[str]:
         """
         Split file into chunks less than chunk_size_bytes.
         Returns list of paths to chunks.
