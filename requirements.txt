@@ -3,4 +3,3 @@ yt-dlp
 instaloader
 pydantic-settings
 aiofiles
-ffmpeg-python
