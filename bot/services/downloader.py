@@ -21,7 +21,8 @@ class DownloadService:
             with yt_dlp.YoutubeDL(self.ydl_opts_base) as ydl:
                 return ydl.extract_info(url, download=False)
         
-        return await asyncio.to_thread(_extract)
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _extract)
 
     async def get_formats(self, url: str) -> List[Dict[str, Any]]:
         """Extract available formats."""
@@ -77,7 +78,8 @@ class DownloadService:
             with yt_dlp.YoutubeDL(opts) as ydl:
                 ydl.download([url])
         
-        await asyncio.to_thread(_download)
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, _download)
         
         if not filename_collector:
             raise Exception("Download finished but filename not captured.")
@@ -98,7 +100,8 @@ class DownloadService:
             with yt_dlp.YoutubeDL(opts) as ydl:
                 ydl.download([url])
 
-        await asyncio.to_thread(_download)
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, _download)
         
         if not filename_collector:
              raise Exception("Download finished but filename not captured.")
