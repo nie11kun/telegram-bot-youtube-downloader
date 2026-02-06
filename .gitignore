@@ -123,3 +123,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Youtube Cookies
+cookies.txt
+
+# Temp Downloads
+temp_downloads/
