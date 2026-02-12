@@ -209,10 +209,15 @@ class DownloadService:
         # Hook to capture filename(s)
         filename_collector = []
         def progress_hook(d):
-            if d['status'] == 'finished':
+            # Log for debugging
+            if d.get('status') == 'finished':
+                logger.info(f"Download hook: Finished {d.get('filename')}")
                 filename_collector.append(d['filename'])
+            elif d.get('status') == 'error':
+                 logger.error(f"Download hook error: {d}")
 
         opts['progress_hooks'] = [progress_hook]
+        opts['verbose'] = True # Enable verbose logging to stdout (for user to see)
 
         def _download():
             with yt_dlp.YoutubeDL(opts) as ydl:
@@ -222,7 +227,8 @@ class DownloadService:
         await loop.run_in_executor(None, _download)
         
         if not filename_collector:
-            raise Exception("Download finished but filename not captured.")
+            logger.error("Download finished but filename_collector is empty.")
+            raise ValueError("No media found. Please check cookies or update yt-dlp.")
             
         return filename_collector
 
