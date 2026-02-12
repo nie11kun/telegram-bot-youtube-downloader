@@ -31,21 +31,35 @@ class DownloadService:
     async def get_formats(self, url: str) -> List[Dict[str, Any]]:
         """Extract available formats."""
         info = await self.get_info(url)
-        formats = info.get('formats', [])
         
+        formats = info.get('formats')
+        if not formats:
+            # Fallback for direct video or missing formats
+            if info.get('url'):
+                formats = [info]
+            elif 'entries' in info:
+                # For playlists/carousels, just take first entry for now to correctly error or handle?
+                # or technically we should download all? 
+                # Current logic implies 1 link = 1 selection. 
+                # Let's try to flatten entries?
+                # Ideally we returns formats for all? No, too messy.
+                # Just take the first video.
+                if info['entries']:
+                    formats = info['entries'][0].get('formats') or [info['entries'][0]]
+
+        if not formats:
+            return []
+
         # Filter and process formats
         processed_formats = []
         seen = set()
         
         for f in formats:
-            ext = f.get('ext')
-            res = f.get('resolution') or f.get('height')
-            note = f.get('format_note')
-            f_id = f.get('format_id')
+            ext = f.get('ext', 'mp4')
+            res = f.get('resolution') or f.get('height') or 'unknown'
+            note = f.get('format_note', '')
+            f_id = f.get('format_id', 'default') # Default ID if missing
             
-            if not f_id:
-                continue
-                
             # Basic deduplication similar to original logic
             key = (ext, res)
             if key not in seen and ext != 'mhtml': 
