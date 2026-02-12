@@ -34,11 +34,13 @@ class DownloadService:
         
     async def get_formats(self, url: str) -> List[Dict[str, Any]]:
         """Extract available formats or playlist items."""
+        logger.info(f"Fetching info for: {url}")
         info = await self.get_info(url)
         
         # Check if it's a playlist/carousel
         if 'entries' in info:
             entries = info['entries']
+            logger.info(f"Found playlist with {len(entries)} entries")
             options = []
             
             # Add "Download All" option
@@ -52,31 +54,42 @@ class DownloadService:
             
             # Add individual items
             for idx, entry in enumerate(entries):
-                if not entry: continue
+                if not entry: 
+                    logger.warning(f"Entry {idx} is empty/None")
+                    continue
+                
                 # Determine type
                 e_ext = entry.get('ext', 'unknown')
                 e_res = entry.get('resolution') or f"{entry.get('width')}x{entry.get('height')}" or 'unknown'
-                e_note = entry.get('title', f'Item {idx+1}')
+                e_title = entry.get('title') or 'Unknown'
+                e_id = entry.get('id')
+                
+                logger.info(f"Entry {idx}: id={e_id}, ext={e_ext}, res={e_res}, title={e_title}")
                 
                 # We use specific format_id syntax: playlist_item:<index>
                 options.append({
                      'format_id': f'playlist_item:{idx+1}',
                      'ext': e_ext,
                      'resolution': e_res,
-                     'note': e_note,
+                     'note': e_title,
                      'filesize': entry.get('filesize'),
                 })
+            
+            logger.info(f"Generated {len(options)} options from playlist")
             return options
 
         # Standard Single Video/Image Logic
         formats = info.get('formats')
+        logger.info(f"Single item. Formats present: {bool(formats)}")
         
         # Fallback for direct video/image (Instagram images often land here)
         if not formats:
             if info.get('url'):
+                logger.info("No formats, utilizing direct URL as metadata")
                 formats = [info]
 
         if not formats:
+            logger.warning("No formats and no direct URL found.")
             return []
 
         # Filter and process formats
@@ -88,6 +101,8 @@ class DownloadService:
             res = f.get('resolution') or f.get('height') or 'unknown'
             note = f.get('format_note', '')
             f_id = f.get('format_id', 'default')
+            
+            logger.info(f"Format: id={f_id}, ext={ext}, res={res}")
             
             # Basic deduplication
             key = (ext, res)
@@ -103,6 +118,7 @@ class DownloadService:
                  })
                  seen.add(key)
                  
+        logger.info(f"Returned {len(processed_formats)} processed single formats")
         return processed_formats
 
     async def download_video(self, url: str, format_id: str) -> List[str]:
