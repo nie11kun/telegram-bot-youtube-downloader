@@ -15,7 +15,7 @@
 
 ### 前置要求
 
--   Python 3.8+
+-   Python 3.10+
 -   [FFmpeg](https://ffmpeg.org/download.html) (必须安装并添加到系统 PATH 环境变量中)
 
 ### 1. 克隆项目
