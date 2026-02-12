@@ -85,11 +85,29 @@ class DownloadService:
         formats = info.get('formats')
         logger.info(f"Single item. Formats present: {bool(formats)}")
         
+        # Log keys to debug structure
+        logger.info(f"Info Keys: {list(info.keys())}")
+        
         # Fallback for direct video/image (Instagram images often land here)
         if not formats:
             if info.get('url'):
                 logger.info("No formats, utilizing direct URL as metadata")
                 formats = [info]
+            elif info.get('thumbnails'):
+                # Try to use best thumbnail as image source
+                logger.info("No formats/url, checking thumbnails...")
+                thumbnails = info.get('thumbnails', [])
+                # Get the largest thumbnail
+                if thumbnails:
+                    best_thumb = thumbnails[-1] # Usually sorted, last is best
+                    logger.info(f"Using best thumbnail as source: {best_thumb.get('url')}")
+                    # Synthesize a format entry
+                    synthetic_fmt = best_thumb.copy()
+                    synthetic_fmt['ext'] = 'jpg' # Assume jpg if not present
+                    if 'id' in best_thumb: synthetic_fmt['format_id'] = best_thumb['id']
+                    else: synthetic_fmt['format_id'] = 'thumb_best'
+                    
+                    formats = [synthetic_fmt]
 
         if not formats:
             logger.warning("No formats and no direct URL found.")
