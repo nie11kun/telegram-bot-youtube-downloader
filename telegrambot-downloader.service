@@ -1,0 +1,17 @@
+[Unit]
+Description=telegrambot to download media Service
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+# Make sure to update the path to the correct env file if needed
+EnvironmentFile=/etc/env_addon
+# WorkingDirectory is important so python finds 'bot' module and imports correctly
+WorkingDirectory=/home/script/telegram-bot-youtube-downloader
+# Use the python executable INSIDE the virtual environment
+ExecStart=/home/script/telegram-bot-youtube-downloader/.venv/bin/python /home/script/telegram-bot-youtube-downloader/main.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
