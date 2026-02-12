@@ -37,6 +37,12 @@ class DownloadService:
         
     async def get_formats(self, url: str) -> List[Dict[str, Any]]:
         """Extract available formats or playlist items."""
+        # Sanitize URL for Instagram (remove img_index, igsh, etc.)
+        if "instagram.com" in url:
+             if "?" in url:
+                 url = url.split("?")[0]
+             logger.info(f"Sanitized Instagram URL: {url}")
+
         logger.info(f"Fetching info for: {url}")
         info = await self.get_info(url)
         
