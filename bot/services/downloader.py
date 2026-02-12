@@ -38,7 +38,7 @@ class DownloadService:
         info = await self.get_info(url)
         
         # Check if it's a playlist/carousel
-        if 'entries' in info:
+        if 'entries' in info and info['entries']:
             entries = info['entries']
             logger.info(f"Found playlist with {len(entries)} entries")
             options = []
@@ -77,6 +77,9 @@ class DownloadService:
             
             logger.info(f"Generated {len(options)} options from playlist")
             return options
+        
+        if 'entries' in info and not info['entries']:
+             logger.warning("Found 'entries' key but it is empty. Falling back to single item logic.")
 
         # Standard Single Video/Image Logic
         formats = info.get('formats')
