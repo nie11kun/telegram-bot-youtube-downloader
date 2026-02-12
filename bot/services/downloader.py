@@ -32,20 +32,49 @@ class DownloadService:
         """Extract available formats."""
         info = await self.get_info(url)
         
+    async def get_formats(self, url: str) -> List[Dict[str, Any]]:
+        """Extract available formats or playlist items."""
+        info = await self.get_info(url)
+        
+        # Check if it's a playlist/carousel
+        if 'entries' in info:
+            entries = info['entries']
+            options = []
+            
+            # Add "Download All" option
+            options.append({
+                'format_id': 'playlist_all',
+                'ext': 'zip', # Conceptual
+                'resolution': f'{len(entries)} items',
+                'note': 'Download All',
+                'filesize': 0
+            })
+            
+            # Add individual items
+            for idx, entry in enumerate(entries):
+                if not entry: continue
+                # Determine type
+                e_ext = entry.get('ext', 'unknown')
+                e_res = entry.get('resolution') or f"{entry.get('width')}x{entry.get('height')}" or 'unknown'
+                e_note = entry.get('title', f'Item {idx+1}')
+                
+                # We use specific format_id syntax: playlist_item:<index>
+                options.append({
+                     'format_id': f'playlist_item:{idx+1}',
+                     'ext': e_ext,
+                     'resolution': e_res,
+                     'note': e_note,
+                     'filesize': entry.get('filesize'),
+                })
+            return options
+
+        # Standard Single Video/Image Logic
         formats = info.get('formats')
+        
+        # Fallback for direct video/image (Instagram images often land here)
         if not formats:
-            # Fallback for direct video or missing formats
             if info.get('url'):
                 formats = [info]
-            elif 'entries' in info:
-                # For playlists/carousels, just take first entry for now to correctly error or handle?
-                # or technically we should download all? 
-                # Current logic implies 1 link = 1 selection. 
-                # Let's try to flatten entries?
-                # Ideally we returns formats for all? No, too messy.
-                # Just take the first video.
-                if info['entries']:
-                    formats = info['entries'][0].get('formats') or [info['entries'][0]]
 
         if not formats:
             return []
@@ -58,9 +87,9 @@ class DownloadService:
             ext = f.get('ext', 'mp4')
             res = f.get('resolution') or f.get('height') or 'unknown'
             note = f.get('format_note', '')
-            f_id = f.get('format_id', 'default') # Default ID if missing
+            f_id = f.get('format_id', 'default')
             
-            # Basic deduplication similar to original logic
+            # Basic deduplication
             key = (ext, res)
             if key not in seen and ext != 'mhtml': 
                  processed_formats.append({
@@ -76,15 +105,28 @@ class DownloadService:
                  
         return processed_formats
 
-    async def download_video(self, url: str, format_id: str) -> str:
+    async def download_video(self, url: str, format_id: str) -> List[str]:
         """
-        Download video with specific format.
-        Returns the path to the downloaded file.
+        Download video with specific format or playlist item.
+        Returns the list of paths to the downloaded file(s).
         """
         opts = self.ydl_opts_base.copy()
-        opts['format'] = format_id
         
-        # Hook to capture filename
+        # Handle Playlist/Carousel logic
+        if format_id == 'playlist_all':
+            # Download all items
+            opts['format'] = 'best' # Best for each item
+            # No playlist_items constraint means download all
+        elif format_id.startswith('playlist_item:'):
+            # Download specific item
+            _, idx = format_id.split(':', 1)
+            opts['playlist_items'] = idx
+            opts['format'] = 'best'
+        else:
+            # Standard single video format
+            opts['format'] = format_id
+        
+        # Hook to capture filename(s)
         filename_collector = []
         def progress_hook(d):
             if d['status'] == 'finished':
@@ -102,7 +144,7 @@ class DownloadService:
         if not filename_collector:
             raise Exception("Download finished but filename not captured.")
             
-        return filename_collector[0]
+        return filename_collector
 
     async def download_best(self, url: str) -> str:
         """Download best format (default behavior)."""
