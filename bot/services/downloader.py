@@ -50,6 +50,22 @@ class DownloadService:
                 logger.warning("Entries empty, retrying with extract_flat=True")
                 info_flat = await self.get_info(url, {'extract_flat': True})
                 entries = info_flat.get('entries', [])
+
+            # RETRY LOGIC 2: If still empty, try noplaylist=True (force single item)
+            if not entries:
+                 logger.warning("Entries still empty, retrying with noplaylist=True")
+                 info_single = await self.get_info(url, {'noplaylist': True})
+                 # Check if this gave us a usable result (not a playlist)
+                 if 'entries' not in info_single and (info_single.get('url') or info_single.get('formats')):
+                     logger.info("noplaylist=True returned a valid single item.")
+                     # Treat this as our info and jump to single item logic
+                     info = info_single
+                     # Clear entries to fall through to single logic
+                     entries = None
+                     # Break out of playlist block? 
+                     # cleaner to just re-assign info and let the next block handle it.
+                 elif 'entries' in info_single and info_single['entries']:
+                     entries = info_single['entries']
             
             if entries:
                 logger.info(f"Found playlist with {len(entries)} entries")
@@ -102,7 +118,11 @@ class DownloadService:
         if 'entries' in info and not info.get('entries'):
              logger.warning("Found 'entries' key but it is still empty after retry. Falling back to single item logic.")
 
-        # Standard Single Video/Image Logic
+        # Standard Single Video/Image Logic (runs if entries is None or empty after retries)
+        if 'entries' not in info or not info.get('entries'):
+             # If we fell through from playlist block, logging happened there.
+             pass
+
         formats = info.get('formats')
         logger.info(f"Single item. Formats present: {bool(formats)}")
         
