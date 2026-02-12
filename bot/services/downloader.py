@@ -19,10 +19,13 @@ class DownloadService:
             }
         }
 
-    async def get_info(self, url: str) -> Dict[str, Any]:
+    async def get_info(self, url: str, extra_opts: Dict = None) -> Dict[str, Any]:
         """Get video information without downloading."""
         def _extract():
-            with yt_dlp.YoutubeDL(self.ydl_opts_base) as ydl:
+            opts = self.ydl_opts_base.copy()
+            if extra_opts:
+                opts.update(extra_opts)
+            with yt_dlp.YoutubeDL(opts) as ydl:
                 return ydl.extract_info(url, download=False)
         
         loop = asyncio.get_event_loop()
@@ -38,48 +41,65 @@ class DownloadService:
         info = await self.get_info(url)
         
         # Check if it's a playlist/carousel
-        if 'entries' in info and info['entries']:
+        if 'entries' in info:
             entries = info['entries']
-            logger.info(f"Found playlist with {len(entries)} entries")
-            options = []
             
-            # Add "Download All" option
-            options.append({
-                'format_id': 'playlist_all',
-                'ext': 'zip', # Conceptual
-                'resolution': f'{len(entries)} items',
-                'note': 'Download All',
-                'filesize': 0
-            })
+            # RETRY LOGIC: If entries empty, try extract_flat=True
+            if not entries:
+                logger.warning("Entries empty, retrying with extract_flat=True")
+                info_flat = await self.get_info(url, {'extract_flat': True})
+                entries = info_flat.get('entries', [])
             
-            # Add individual items
-            for idx, entry in enumerate(entries):
-                if not entry: 
-                    logger.warning(f"Entry {idx} is empty/None")
-                    continue
+            if entries:
+                logger.info(f"Found playlist with {len(entries)} entries")
+                options = []
                 
-                # Determine type
-                e_ext = entry.get('ext', 'unknown')
-                e_res = entry.get('resolution') or f"{entry.get('width')}x{entry.get('height')}" or 'unknown'
-                e_title = entry.get('title') or 'Unknown'
-                e_id = entry.get('id')
-                
-                logger.info(f"Entry {idx}: id={e_id}, ext={e_ext}, res={e_res}, title={e_title}")
-                
-                # We use specific format_id syntax: playlist_item:<index>
+                # Add "Download All" option
                 options.append({
-                     'format_id': f'playlist_item:{idx+1}',
-                     'ext': e_ext,
-                     'resolution': e_res,
-                     'note': e_title,
-                     'filesize': entry.get('filesize'),
+                    'format_id': 'playlist_all',
+                    'ext': 'zip', # Conceptual
+                    'resolution': f'{len(entries)} items',
+                    'note': 'Download All',
+                    'filesize': 0
                 })
-            
-            logger.info(f"Generated {len(options)} options from playlist")
-            return options
+                
+                # Add individual items
+                for idx, entry in enumerate(entries):
+                    if not entry: 
+                        logger.warning(f"Entry {idx} is empty/None")
+                        continue
+                    
+                    # Determine type
+                    e_ext = entry.get('ext', 'unknown')
+                    e_res = entry.get('resolution') or f"{entry.get('width')}x{entry.get('height')}" or 'unknown'
+                    e_title = entry.get('title') or 'Unknown'
+                    e_id = entry.get('id')
+                    e_url = entry.get('url') # Crucial for flat extraction
+                    
+                    logger.info(f"Entry {idx}: id={e_id}, ext={e_ext}, res={e_res}, title={e_title}, url={e_url}")
+                    
+                    # Store URL in format_id if we used flat extraction (since indices might be unreliable or we prefer direct links)
+                    # But download_video needs to handle it.
+                    # Let's use a new prefix "playlist_url:" if we have a url, otherwise keep "playlist_item:"
+                    
+                    if e_url:
+                        f_id_str = f'playlist_url:{e_url}'
+                    else:
+                        f_id_str = f'playlist_item:{idx+1}'
+
+                    options.append({
+                         'format_id': f_id_str,
+                         'ext': e_ext,
+                         'resolution': e_res,
+                         'note': e_title,
+                         'filesize': entry.get('filesize'),
+                    })
+                
+                logger.info(f"Generated {len(options)} options from playlist")
+                return options
         
-        if 'entries' in info and not info['entries']:
-             logger.warning("Found 'entries' key but it is empty. Falling back to single item logic.")
+        if 'entries' in info and not info.get('entries'):
+             logger.warning("Found 'entries' key but it is still empty after retry. Falling back to single item logic.")
 
         # Standard Single Video/Image Logic
         formats = info.get('formats')
@@ -155,9 +175,15 @@ class DownloadService:
             opts['format'] = 'best' # Best for each item
             # No playlist_items constraint means download all
         elif format_id.startswith('playlist_item:'):
-            # Download specific item
+            # Download specific item by index
             _, idx = format_id.split(':', 1)
             opts['playlist_items'] = idx
+            opts['format'] = 'best'
+        elif format_id.startswith('playlist_url:'):
+            # Download specific item by URL (from flat extraction)
+            _, item_url = format_id.split(':', 1)
+            # When downloading a specific child URL, we treat it as a new download
+            url = item_url
             opts['format'] = 'best'
         else:
             # Standard single video format
