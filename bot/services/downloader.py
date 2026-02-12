@@ -130,8 +130,16 @@ class DownloadService:
                     formats = [synthetic_fmt]
 
         if not formats:
-            logger.warning("No formats and no direct URL found.")
-            return []
+            logger.warning("No formats and no direct URL found. Attempting Force Download option.")
+            # Fallback: Offer a "Force Download" button using the URL itself
+            # This relies on yt-dlp's download capability handling the URL better than extract_info
+            return [{
+                'format_id': 'force_download',
+                'ext': 'unknown',
+                'resolution': 'unknown',
+                'note': 'Force Download (Blind)',
+                'filesize': 0
+            }]
 
         # Filter and process formats
         processed_formats = []
@@ -184,6 +192,9 @@ class DownloadService:
             _, item_url = format_id.split(':', 1)
             # When downloading a specific child URL, we treat it as a new download
             url = item_url
+            opts['format'] = 'best'
+        elif format_id == 'force_download':
+            # Blind download
             opts['format'] = 'best'
         else:
             # Standard single video format
