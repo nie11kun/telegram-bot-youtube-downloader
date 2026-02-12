@@ -37,12 +37,7 @@ class DownloadService:
         
     async def get_formats(self, url: str) -> List[Dict[str, Any]]:
         """Extract available formats or playlist items."""
-        # Sanitize URL for Instagram (remove img_index, igsh, etc.)
-        if "instagram.com" in url:
-             if "?" in url:
-                 url = url.split("?")[0]
-             logger.info(f"Sanitized Instagram URL: {url}")
-
+        url = self._sanitize_url(url)
         logger.info(f"Fetching info for: {url}")
         info = await self.get_info(url)
         
@@ -176,11 +171,20 @@ class DownloadService:
         logger.info(f"Returned {len(processed_formats)} processed single formats")
         return processed_formats
 
+    def _sanitize_url(self, url: str) -> str:
+        """Remove query parameters from Instagram URLs to prevent yt-dlp confusion."""
+        if "instagram.com" in url and "?" in url:
+            clean_url = url.split("?")[0]
+            logger.info(f"Sanitized Instagram URL: {clean_url}")
+            return clean_url
+        return url
+
     async def download_video(self, url: str, format_id: str) -> List[str]:
         """
         Download video with specific format or playlist item.
         Returns the list of paths to the downloaded file(s).
         """
+        url = self._sanitize_url(url)
         opts = self.ydl_opts_base.copy()
         
         # Handle Playlist/Carousel logic
