@@ -38,27 +38,37 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         file_size = os.path.getsize(file_path)
         chunks = [file_path]
         
-        if file_size > settings.MAX_FILE_SIZE:
+        is_image = ext.lower() in ['jpg', 'jpeg', 'png', 'webp', 'heic']
+        
+        if not is_image and file_size > settings.MAX_FILE_SIZE:
              await query.edit_message_text(f"File too large ({file_size/1024/1024:.1f}MB). Splitting...")
              try:
                 chunks = await processor.split_file(file_path, settings.MAX_FILE_SIZE)
              except Exception as e:
                 logger.error(f"Split failed: {e}")
                 await query.edit_message_text("Failed to split file. It might be too large to send.")
-                # Try to send original anyway? No, Telegram will reject.
                 return
 
         await query.edit_message_text("Uploading...")
         
         for chunk in chunks:
             with open(chunk, 'rb') as f:
-                await context.bot.send_document(
-                    chat_id=update.effective_chat.id,
-                    document=f,
-                    read_timeout=settings.DEFAULT_TIMEOUT,
-                    write_timeout=settings.DEFAULT_TIMEOUT,
-                    connect_timeout=settings.DEFAULT_TIMEOUT
-                )
+                if is_image:
+                     await context.bot.send_photo(
+                        chat_id=update.effective_chat.id,
+                        photo=f,
+                        read_timeout=settings.DEFAULT_TIMEOUT,
+                        write_timeout=settings.DEFAULT_TIMEOUT,
+                        connect_timeout=settings.DEFAULT_TIMEOUT
+                    )
+                else:
+                    await context.bot.send_document(
+                        chat_id=update.effective_chat.id,
+                        document=f,
+                        read_timeout=settings.DEFAULT_TIMEOUT,
+                        write_timeout=settings.DEFAULT_TIMEOUT,
+                        connect_timeout=settings.DEFAULT_TIMEOUT
+                    )
                 
         await query.edit_message_text("Finished.")
         
